@@ -32,13 +32,4 @@ router.get('/login/success', (req, res) => {
     }
 });
 
-router.get('/debug-cookie', (req, res) => {
-  res.cookie('testcookie', 'testvalue', {
-    secure: true,
-    httpOnly: true,
-    sameSite: 'none',
-  });
-  res.send('Cookie set');
-});
-
 module.exports = router;
