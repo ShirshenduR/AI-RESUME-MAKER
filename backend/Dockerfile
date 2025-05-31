@@ -1,27 +1,27 @@
-# Use Ubuntu as base image
+# Base image
 FROM ubuntu:22.04
 
 # Set environment to non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Node.js 18.x and LaTeX (texlive-full)
+# Install Node.js and LaTeX
 RUN apt-get update && \
     apt-get install -y curl gnupg software-properties-common && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs texlive-full && \
     apt-get clean
 
-# Set working directory
+# Set working directory to /app
 WORKDIR /app
 
-# Copy backend source files
+# Copy backend code only
 COPY . .
 
-# Install backend dependencies
+# Install dependencies
 RUN npm install
 
-# Expose the port your backend listens on
+# Expose backend port
 EXPOSE 5000
 
-# Start the backend server
+# Start backend server
 CMD ["npm", "start"]
