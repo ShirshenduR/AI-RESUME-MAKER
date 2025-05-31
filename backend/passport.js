@@ -5,24 +5,29 @@ require('dotenv').config();
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.SERVER_URL}/auth/google/callback`,
-    scope: ['profile', 'email']
-}, (accessToken, refreshToken, profile, callback) => {
+    callbackURL: `${process.env.SERVER_URL}/auth/google/callback`
+}, (accessToken, refreshToken, profile, done) => {
     const user = {
         id: profile.id,
         displayName: profile.displayName,
         email: profile.emails[0].value,
         photo: profile.photos[0].value
     };
-    return callback(null, user);
+    done(null, user);
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user);  
+    done(null, user.id);  // save only user ID to session
 });
 
-passport.deserializeUser((user, done) => {
-    done(null, user); 
+passport.deserializeUser((id, done) => {
+    // Here you should ideally fetch user by ID from DB
+    // For now, just recreate user object or fetch from some cache
+    // If no DB, store user info in-memory or in session instead
+
+    // Example dummy user for testing:
+    const user = { id: id }; // minimal user object, update as needed
+    done(null, user);
 });
 
 module.exports = passport;
