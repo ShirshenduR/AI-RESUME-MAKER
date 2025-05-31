@@ -17,16 +17,12 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);  // save only user ID to session
+    done(null, user.id); 
 });
 
 passport.deserializeUser((id, done) => {
-    // Here you should ideally fetch user by ID from DB
-    // For now, just recreate user object or fetch from some cache
-    // If no DB, store user info in-memory or in session instead
 
-    // Example dummy user for testing:
-    const user = { id: id }; // minimal user object, update as needed
+    const user = { id: id };
     done(null, user);
 });
 
