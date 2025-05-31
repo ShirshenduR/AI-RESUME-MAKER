@@ -8,7 +8,9 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', 
     passport.authenticate('google', { failureRedirect: '/#/login' }),
     (req, res) => {
-        res.redirect(process.env.CLIENT_URL+ '/#/dashboard');
+        req.session.save(() => {
+            res.redirect(process.env.CLIENT_URL + '/#/dashboard');
+        });
     }
 );
 
