@@ -1,129 +1,103 @@
-# 📄 Resume-Maker
+# AI Resume Maker
 
-A full-stack web application that allows students to easily create **professional, ATS-friendly resumes**. Users can input their personal and professional details, preview a live resume, generate AI-enhanced project descriptions, and download the final result as a PDF.
-
----
-
-## 🚀 Features
-
-* ✅ User Authentication (Signup/Login)
-* 📝 Resume Form (Input personal, academic, and professional details)
-* 🔍 Live Resume Preview
-* 📄 PDF Generation
-* 🤖 **AI-Powered Project Enhancer** (Generate ATS-optimized descriptions from project title & summary)
+A modern, LaTeX-inspired resume builder with live preview, Google OAuth, and AI-powered bullet point generation.
 
 ---
 
-## 🧠 AI-Powered Resume Enhancer
+## Features
 
-Just enter your **project title** and a short description — our AI engine will:
-
-* Create **clear, concise bullet points**
-* Highlight **impact, technologies, and achievements**
-* Ensure content is **ATS (Applicant Tracking System) optimized**
-
-Preview it instantly, tweak if needed, and download your resume with this polished content!
-
----
-
-## 💠 Tech Stack
-
-| Section            | Tech Used                               |
-| ------------------ | --------------------------------------- |
-| **Frontend**       | React.js, HTML, CSS                     |
-| **Backend**        | Node.js, Express.js                     |
-| **Database**       | MongoDB, Mongoose                       |
-| **Authentication** | JWT, bcrypt.js                          |
-| **PDF Generation** | Puppeteer / html2pdf.js                 |
-| **AI Integration** | OpenAI API / Mistral / Custom Prompting |
+- **Google OAuth Login/Logout**: Secure authentication with Google, including profile image and logout from the app.
+- **Dashboard**: Clean, robust UI for entering all resume sections:
+  - Personal Details
+  - Education (multiple entries, start/end dates)
+  - Experience (multiple entries, bullet points, start/end dates)
+  - Projects (multiple entries, bullet points, start/end dates, AI bullet generation)
+  - Skills (languages, frameworks, tools, libraries)
+- **Section Toggles**: Sidebar checkboxes to show/hide resume sections in preview and final PDF.
+- **Live LaTeX-Style Preview**: Real-time preview matching a professional LaTeX resume template, with correct fonts, spacing, and alignment.
+- **PDF Generation**: One-click PDF export (backend integration required).
+- **AI Bullet Point Generation**: (Pluggable) Generate project bullet points using AI based on project name and description.
+- **Responsive Design**: Works on desktop and mobile.
 
 ---
 
-## 📦 Installation & Setup
+## Project Structure
 
-### 🔧 Prerequisites
+```
+AI-RESUME-MAKER/
+  backend/           # Node.js/Express backend (API, OAuth, PDF, AI endpoints)
+  frontend/          # React frontend (Vite, main app UI)
+```
 
-* [Node.js](https://nodejs.org/)
-* [MongoDB](https://www.mongodb.com/)
-* [OpenAI API Key](https://platform.openai.com/) (or your selected model)
+---
 
-### 🖥 Backend Setup
+## Setup Instructions
 
-```bash
-git clone https://github.com/your-username/resume-maker.git
-cd resume-maker
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm or yarn
+
+### 1. Clone the Repository
+```sh
+git clone <repo-url>
+cd AI-RESUME-MAKER
+```
+
+### 2. Backend Setup
+```sh
+cd backend
 npm install
-```
-
-Create a `.env` file in the root with the following:
-
-```
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-OPENAI_API_KEY=your_openai_or_mistral_key
-```
-
-Start the backend server:
-
-```bash
+# Create a .env file with your Google OAuth credentials and other secrets
+# Example .env:
+# GOOGLE_CLIENT_ID=your-client-id
+# GOOGLE_CLIENT_SECRET=your-client-secret
+# SESSION_SECRET=your-session-secret
+# FRONTEND_URL=http://localhost:5173
+# (Optional) AI_API_KEY=your-openai-or-other-key
 npm start
 ```
+- The backend runs on `http://localhost:5000` by default.
 
-### 💼 Frontend Setup
-
-```bash
-cd client
+### 3. Frontend Setup
+```sh
+cd ../frontend
 npm install
-npm start
+# Create a .env file with:
+# VITE_API_URL=http://localhost:5000
+npm run dev
 ```
+- The frontend runs on `http://localhost:5173` by default.
 
 ---
 
-## 🔗 API Routes
+## AI Resume Maker: How It Works
 
-### 🔐 Authentication
-
-* `POST /api/auth/signup` – Register a new user
-* `POST /api/auth/login` – Login user
-
-### 📄 Resume
-
-* `POST /api/resume` – Save resume details
-* `GET /api/resume/:id` – Fetch resume
-* `GET /api/resume/pdf/:id` – Generate & download resume PDF
-
-### 🤖 AI Resume Enhancement
-
-* `POST /api/ai/generate-project` – Generate ATS-optimized description from title & summary
+- **Login**: Sign in with Google to access your dashboard.
+- **Enter Resume Data**: Fill out each section. Add/remove entries as needed.
+- **Section Toggles**: Use sidebar checkboxes to control which sections appear in your resume.
+- **Live Preview**: Click "Preview Resume" to see your resume in a LaTeX-style format.
+- **AI Bullet Points**: In the Projects section, enter a project name and description, then click "Generate AI Bullet Points" to auto-generate bullet points (requires backend AI integration).
+- **Export PDF**: Click "Generate PDF" in the preview to download your resume (requires backend PDF integration).
 
 ---
 
-## 🚀 Deployment
-
-| Component    | Recommended Platform |
-| ------------ | -------------------- |
-| **Backend**  | Heroku / Render      |
-| **Frontend** | Vercel / Netlify     |
-| **Database** | MongoDB Atlas        |
+## Customization & Extensibility
+- **AI Integration**: Connect your preferred AI API (e.g., OpenAI) in the backend for bullet point generation.
+- **PDF Generation**: Implement PDF export in the backend (e.g., using Puppeteer or pdfkit).
+- **Styling**: Tweak `Preview.css` and `Dashboard.css` for further LaTeX-style or branding customizations.
 
 ---
-
-## 📸 Screenshots
-
-> Yet to be uploaded.....
-
----
-
-## 🙌 Contributors
-
-* [Shirshendu R](https://github.com/ShirshenduR)
-
----
-
-## 📬 Feedback & Contributions
-
-Found a bug or have a suggestion? Open an issue or pull request. Let's build something impactful for students, together!
 
 ## License
-This project is open-source and available under the MIT License.
+MIT
+
+---
+
+## Credits
+- LaTeX resume template inspiration: [sb2nov/resume](https://github.com/sb2nov/resume)
+- Author: Jake Gutierrez (template inspiration)
+
+---
+
+For questions or contributions, please open an issue or pull request.
 
