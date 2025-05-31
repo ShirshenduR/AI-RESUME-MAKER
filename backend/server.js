@@ -20,7 +20,7 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
-
+app.set('trust proxy', 1);
 app.use(cookieSession({
     name: 'session',
     keys: [process.env.COOKIE_KEY],
