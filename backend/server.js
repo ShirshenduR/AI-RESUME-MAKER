@@ -9,6 +9,7 @@ const { GoogleGenAI } = require("@google/genai");
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const latex = require('node-latex');
 const { latexEscape } = require('./utils/latexEscape');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -82,67 +83,30 @@ app.post('/api/generate-pdf', async (req, res) => {
 
     try {
         const latexContent = generateLatexContent(formData, visibleSections);
-        
-        const tempDir = path.join(__dirname, 'temp');
-        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-        const timestamp = Date.now();
-        const filename = `resume_${timestamp}`;
-        const texPath = path.join(tempDir, `${filename}.tex`);
-        const pdfPath = path.join(tempDir, `${filename}.pdf`);
-
-        fs.writeFileSync(texPath, latexContent);
-
-        await compileToPdf(texPath, tempDir);
-
-        if (!fs.existsSync(pdfPath)) {
-            console.error('PDF file missing after pdflatex compilation');
-            return res.status(500).json({ error: 'PDF compilation failed: file missing' });
-        }
-
-        const pdfBuffer = fs.readFileSync(pdfPath);
-
-        console.log('Sending PDF response, size:', pdfBuffer.length);
-
+        // Use node-latex streaming API
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${latexEscape(formData.personal.name || 'resume')}.pdf"`);
 
-        res.send(pdfBuffer);
+        const inputStream = require('stream').Readable.from([latexContent]);
+        const pdfStream = latex(inputStream);
 
-        // Cleanup files (optional)
-        try {
-            fs.unlinkSync(texPath);
-            fs.unlinkSync(pdfPath);
-            ['.aux', '.log', '.out'].forEach(ext => {
-                const f = path.join(tempDir, `${filename}${ext}`);
-                if (fs.existsSync(f)) fs.unlinkSync(f);
-            });
-        } catch (e) {
-            console.warn('Error cleaning up temp files:', e);
-        }
+        pdfStream.on('error', (err) => {
+            console.error('LaTeX compile error:', err);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Failed to compile LaTeX to PDF' });
+            }
+        });
+
+        pdfStream.pipe(res);
 
     } catch (error) {
         console.error('PDF generation error:', error);
-        res.status(500).json({ error: 'Failed to generate PDF: ' + error.message });
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Failed to generate PDF: ' + error.message });
+        }
     }
 });
-
-function compileToPdf(texPath, workingDir) {
-    return new Promise((resolve, reject) => {
-        const command = `pdflatex -interaction=nonstopmode -output-directory="${workingDir}" "${texPath}"`;
-
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error('pdflatex error:', error);
-                console.error('pdflatex stdout:', stdout);
-                console.error('pdflatex stderr:', stderr);
-                reject(new Error(`LaTeX compilation failed: ${error.message}`));
-                return;
-            }
-            resolve();
-        });
-    });
-}
 
 function generateLatexContent(formData, visibleSections) {
     const formatMonth = (dateStr) => {

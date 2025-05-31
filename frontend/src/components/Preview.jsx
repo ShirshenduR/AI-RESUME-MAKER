@@ -66,57 +66,50 @@ function Preview({ formData, visibleSections, onClose }) {
     const isPdfGenerationPossible = canGeneratePdf();
 
     const handleGeneratePdf = async () => {
-    if (!isPdfGenerationPossible) {
-        setPdfError("Please fill in all visible sections before generating a PDF.");
-        return;
-    }
-    setIsGeneratingPdf(true);
-    setPdfError(null);
-    try {
-        const response = await fetch('/api/generate-pdf', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ formData, visibleSections }),
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response content-type:', response.headers.get('content-type'));
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Failed to generate PDF. Ensure the backend is running and the endpoint is correctly implemented.' }));
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        if (!isPdfGenerationPossible) {
+            setPdfError("Please fill in all visible sections before generating a PDF.");
+            return;
         }
+        setIsGeneratingPdf(true);
+        setPdfError(null);
+        try {
+            const response = await fetch('/api/generate-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ formData, visibleSections }),
+            });
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/pdf')) {
-            const text = await response.text();
-            console.error('Expected PDF but got:', text);
-            throw new Error('Invalid response from server. Expected a PDF file.');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Failed to generate PDF. Ensure the backend is running and the endpoint is correctly implemented.' }));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/pdf')) {
+                const text = await response.text();
+                throw new Error('Invalid response from server. Expected a PDF file.');
+            }
+
+            const blob = await response.blob();
+            if (blob.type !== 'application/pdf') {
+                throw new Error('Invalid blob type. Expected a PDF file.');
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(formData.personal.name || 'resume').replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            setPdfError(error.message);
+        } finally {
+            setIsGeneratingPdf(false);
         }
-
-        const blob = await response.blob();
-
-        if (blob.type !== 'application/pdf') {
-            throw new Error('Invalid blob type. Expected a PDF file.');
-        }
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${(formData.personal.name || 'resume').replace(/\s+/g, '_')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-    } catch (error) {
-        setPdfError(error.message);
-    } finally {
-        setIsGeneratingPdf(false);
-    }
-};
+    };
 
     const formatMonth = (dateStr) => {
         if (!dateStr) return '';
@@ -130,7 +123,7 @@ function Preview({ formData, visibleSections, onClose }) {
     };
 
     const isSectionFilled = (sectionName) => {
-        if (!visibleSections[sectionName]) return true; // If not visible, it's "filled" for this check
+        if (!visibleSections[sectionName]) return true;
 
         switch (sectionName) {
             case 'education':
