@@ -75,7 +75,7 @@ app.post('/ai/generate-bullets', async (req, res) => {
 
 app.post('/api/generate-pdf', async (req, res) => {
     const { formData, visibleSections } = req.body;
-    
+
     if (!formData || !visibleSections) {
         return res.status(400).json({ error: 'Missing required data' });
     }
@@ -83,7 +83,7 @@ app.post('/api/generate-pdf', async (req, res) => {
     try {
         // Generate LaTeX content
         const latexContent = generateLatexContent(formData, visibleSections);
-        
+
         // Create temporary directory for LaTeX compilation
         const tempDir = path.join(__dirname, 'temp');
         if (!fs.existsSync(tempDir)) {
@@ -106,25 +106,29 @@ app.post('/api/generate-pdf', async (req, res) => {
             throw new Error('PDF compilation failed');
         }
 
+        const pdfBuffer = fs.readFileSync(pdfPath);
+
+        // Set headers before sending the PDF
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${latexEscape(formData.personal.name || 'resume')}.pdf"`);
-        
-        const pdfBuffer = fs.readFileSync(pdfPath);
-        
-        try {
-            fs.unlinkSync(texPath);
-            fs.unlinkSync(pdfPath);
-            const auxFiles = ['.aux', '.log', '.out'].map(ext => path.join(tempDir, `${filename}${ext}`));
-            auxFiles.forEach(file => {
-                if (fs.existsSync(file)) {
-                    fs.unlinkSync(file);
-                }
-            });
-        } catch (cleanupError) {
-            // Ignore cleanup errors
-        }
+        res.setHeader('Content-Length', pdfBuffer.length);
 
+        // Send the PDF buffer
         res.send(pdfBuffer);
+
+        // Cleanup files asynchronously after response sent
+        setTimeout(() => {
+            try {
+                fs.unlinkSync(texPath);
+                fs.unlinkSync(pdfPath);
+                ['.aux', '.log', '.out'].forEach(ext => {
+                    const file = path.join(tempDir, `${filename}${ext}`);
+                    if (fs.existsSync(file)) fs.unlinkSync(file);
+                });
+            } catch (cleanupError) {
+                console.error('Cleanup error:', cleanupError);
+            }
+        }, 1000);
 
     } catch (error) {
         console.error('PDF generation error:', error);
@@ -135,18 +139,15 @@ app.post('/api/generate-pdf', async (req, res) => {
 function compileToPdf(texPath, workingDir) {
     return new Promise((resolve, reject) => {
         const command = `pdflatex -interaction=nonstopmode -output-directory="${workingDir}" "${texPath}"`;
-        
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.error('pdflatex error:', error);
-                reject(new Error(`LaTeX compilation failed: ${error.message}`));
-                return;
+                return reject(new Error(`LaTeX compilation failed: ${error.message}`));
             }
             resolve();
         });
     });
 }
-
 function generateLatexContent(formData, visibleSections) {
     const formatMonth = (dateStr) => {
         if (!dateStr) return '';
