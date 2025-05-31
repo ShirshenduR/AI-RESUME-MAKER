@@ -6,9 +6,9 @@ router.get('/google', passport.authenticate('google', {
 }));
 
 router.get('/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/login' }),
+    passport.authenticate('google', { failureRedirect: '/#/login' }),
     (req, res) => {
-        res.redirect(process.env.CLIENT_URL+ '/dashboard');
+        res.redirect(process.env.CLIENT_URL+ '/#/dashboard');
     }
 );
 
@@ -18,7 +18,7 @@ router.get('/logout', (req, res) => {
             console.error('Error during logout:', err);
             return res.status(500).json({ message: 'Error during logout' });
         }
-        res.redirect(process.env.CLIENT_URL + '/login');
+        res.redirect(process.env.CLIENT_URL + '/#/login');
     });
 });
 
