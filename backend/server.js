@@ -16,14 +16,14 @@ const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
 
 const app = express();
 
-
+app.set('trust proxy', 1);
 app.use(cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
-app.set('trust proxy', 1);
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
