@@ -1,0 +1,336 @@
+:root {
+    --primary-gradient: linear-gradient(180deg, #172133 20%, #2C60BB 85%);
+    --sidebar-width: 250px;
+    --nav-height: 70px;
+    --spacing-sm: 0.5rem;
+    --text-dark: #172133;
+}
+
+.dashboard {
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.dashboard-nav {
+    height: var(--nav-height);
+    background: white;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+}
+
+.logo svg {
+    width: 3rem;
+    height: 3rem;
+}
+
+.logo p {
+    font-family: 'Lucida Sans', sans-serif;
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.preview-btn {
+    padding: 0.5rem 1.5rem;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preview-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(44, 96, 187, 0.3);
+}
+
+.dashboard-content {
+    display: flex;
+    height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: white;
+    padding: 2rem 1rem;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    height: calc(100vh - var(--nav-height));
+    position: fixed;
+    top: var(--nav-height);
+    overflow-y: auto;
+}
+
+.sidebar-btn {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-btn:hover {
+    background: #f5f5f5;
+}
+
+.sidebar-btn.active {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.form-container {
+    flex: 1;
+    padding: 2rem;
+    margin-left: var(--sidebar-width);
+    overflow-y: auto;
+    height: calc(100vh - var(--nav-height));
+}
+
+.form-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-section h2 {
+    margin-bottom: 1.5rem;
+    color: #172133;
+}
+
+.form-section input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-section input:focus {
+    outline: none;
+    border-color: #2C60BB;
+    box-shadow: 0 0 0 2px rgba(44, 96, 187, 0.1);
+}
+
+.education-entry, .experience-entry, .project-entry {
+    border: 1px solid #eee;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.add-btn {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+}
+
+input {
+    margin-bottom: 0.5rem;
+}
+
+.bullet-points {
+    margin-top: 1rem;
+}
+
+.bullet-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.bullet-input input {
+    margin-bottom: 0;
+}
+
+.bullet-input::before {
+    content: "•";
+    font-size: 1.5rem;
+}
+
+.remove-bullet {
+    background: none;
+    border: none;
+    color: #ff4444;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+}
+
+.add-bullet-btn {
+    background: none;
+    border: 1px dashed #2C60BB;
+    color: #2C60BB;
+    padding: 0.5rem;
+    width: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.add-bullet-btn:hover {
+    background: rgba(44, 96, 187, 0.1);
+}
+
+.generate-ai-btn {
+  background: linear-gradient(90deg, #4f8cff 0%, #2356c7 100%);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.45em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(79, 140, 255, 0.08);
+  margin-top: 0.2em;
+  margin-bottom: 0.5em;
+}
+.generate-ai-btn:disabled {
+  background: #b3c6e6;
+  color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.project-entry textarea {
+  width: 100%;
+  min-height: 44px;
+  font-size: 1em;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.5em 0.8em;
+  margin: 0.5em 0 0.2em 0;
+  resize: vertical;
+  font-family: inherit;
+  background: #f9fbfd;
+  transition: border 0.2s;
+}
+.project-entry textarea:focus {
+  border: 1.5px solid #4f8cff;
+  outline: none;
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+    .dashboard-content {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        top: 0;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-container {
+        margin-left: 0;
+        padding: 1rem;
+        height: auto;
+        min-height: calc(100vh - var(--nav-height) - 200px);
+    }
+
+    .dashboard-nav {
+        padding: 0 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .preview-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-nav {
+        padding: 0 0.5rem;
+    }
+
+    .form-container {
+        padding: 0.5rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .sidebar-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2C60BB;
+}
+
+.nav-logout-btn {
+    padding: 0.5rem 1.5rem;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.nav-logout-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(44, 96, 187, 0.3);
+}
