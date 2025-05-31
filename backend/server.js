@@ -75,60 +75,51 @@ app.post('/ai/generate-bullets', async (req, res) => {
 
 app.post('/api/generate-pdf', async (req, res) => {
     const { formData, visibleSections } = req.body;
-
+    
     if (!formData || !visibleSections) {
         return res.status(400).json({ error: 'Missing required data' });
     }
 
     try {
-        // Generate LaTeX content
         const latexContent = generateLatexContent(formData, visibleSections);
-
-        // Create temporary directory for LaTeX compilation
+        
         const tempDir = path.join(__dirname, 'temp');
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
         const timestamp = Date.now();
         const filename = `resume_${timestamp}`;
         const texPath = path.join(tempDir, `${filename}.tex`);
         const pdfPath = path.join(tempDir, `${filename}.pdf`);
 
-        // Write LaTeX content to file
         fs.writeFileSync(texPath, latexContent);
 
-        // Compile LaTeX to PDF
         await compileToPdf(texPath, tempDir);
 
-        // Check if PDF was generated
         if (!fs.existsSync(pdfPath)) {
-            throw new Error('PDF compilation failed');
+            console.error('PDF file missing after pdflatex compilation');
+            return res.status(500).json({ error: 'PDF compilation failed: file missing' });
         }
 
         const pdfBuffer = fs.readFileSync(pdfPath);
 
-        // Set headers before sending the PDF
+        console.log('Sending PDF response, size:', pdfBuffer.length);
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${latexEscape(formData.personal.name || 'resume')}.pdf"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
 
-        // Send the PDF buffer
         res.send(pdfBuffer);
 
-        // Cleanup files asynchronously after response sent
-        setTimeout(() => {
-            try {
-                fs.unlinkSync(texPath);
-                fs.unlinkSync(pdfPath);
-                ['.aux', '.log', '.out'].forEach(ext => {
-                    const file = path.join(tempDir, `${filename}${ext}`);
-                    if (fs.existsSync(file)) fs.unlinkSync(file);
-                });
-            } catch (cleanupError) {
-                console.error('Cleanup error:', cleanupError);
-            }
-        }, 1000);
+        // Cleanup files (optional)
+        try {
+            fs.unlinkSync(texPath);
+            fs.unlinkSync(pdfPath);
+            ['.aux', '.log', '.out'].forEach(ext => {
+                const f = path.join(tempDir, `${filename}${ext}`);
+                if (fs.existsSync(f)) fs.unlinkSync(f);
+            });
+        } catch (e) {
+            console.warn('Error cleaning up temp files:', e);
+        }
 
     } catch (error) {
         console.error('PDF generation error:', error);
@@ -139,15 +130,20 @@ app.post('/api/generate-pdf', async (req, res) => {
 function compileToPdf(texPath, workingDir) {
     return new Promise((resolve, reject) => {
         const command = `pdflatex -interaction=nonstopmode -output-directory="${workingDir}" "${texPath}"`;
+
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.error('pdflatex error:', error);
-                return reject(new Error(`LaTeX compilation failed: ${error.message}`));
+                console.error('pdflatex stdout:', stdout);
+                console.error('pdflatex stderr:', stderr);
+                reject(new Error(`LaTeX compilation failed: ${error.message}`));
+                return;
             }
             resolve();
         });
     });
 }
+
 function generateLatexContent(formData, visibleSections) {
     const formatMonth = (dateStr) => {
         if (!dateStr) return '';
