@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Preview.css';
 
 function Preview({ formData, visibleSections, onClose }) {
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [pdfError, setPdfError] = useState(null);
+
     const isEducationEmpty = (education) =>
         !education.length || education.every(edu =>
             !edu.school && !edu.location && !edu.degree && !edu.date
@@ -34,8 +37,73 @@ function Preview({ formData, visibleSections, onClose }) {
         points: (proj.points || []).filter(point => point.trim())
     })).filter(proj => proj.name || proj.startDate || proj.endDate);
 
-    const generatePDF = () => {
-        alert('PDF generation not implemented in this demo.');
+    const canGeneratePdf = () => {
+        let hasAtLeastOneVisibleAndFilledSection = false;
+
+        if (visibleSections.personal) {
+            if (!formData.personal.name) return false;
+            hasAtLeastOneVisibleAndFilledSection = true;
+        }
+        if (visibleSections.education) {
+            if (cleanEducation.length === 0) return false;
+            hasAtLeastOneVisibleAndFilledSection = true;
+        }
+        if (visibleSections.experience) {
+            if (cleanExperience.length === 0) return false;
+            hasAtLeastOneVisibleAndFilledSection = true;
+        }
+        if (visibleSections.projects) {
+            if (cleanProjects.length === 0) return false;
+            hasAtLeastOneVisibleAndFilledSection = true;
+        }
+        if (visibleSections.skills) {
+            if (isSkillsEmpty(formData.skills)) return false;
+            hasAtLeastOneVisibleAndFilledSection = true;
+        }
+        
+        return hasAtLeastOneVisibleAndFilledSection;
+    };
+    const isPdfGenerationPossible = canGeneratePdf();
+
+    const handleGeneratePdf = async () => {
+        if (!isPdfGenerationPossible) {
+            setPdfError("Please fill in all visible sections before generating a PDF.");
+            return;
+        }
+        setIsGeneratingPdf(true);
+        setPdfError(null);
+        try {
+            const response = await fetch('/api/generate-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ formData, visibleSections }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Failed to generate PDF. Ensure the backend is running and the endpoint is correctly implemented.' }));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            if (blob.type !== 'application/pdf') {
+                throw new Error('Invalid response from server. Expected a PDF file.');
+            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(formData.personal.name || 'resume').replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            setPdfError(error.message);
+        } finally {
+            setIsGeneratingPdf(false);
+        }
     };
 
     const formatMonth = (dateStr) => {
@@ -47,6 +115,23 @@ function Preview({ formData, visibleSections, onClose }) {
             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
         ];
         return `${monthNames[parseInt(month, 10)]} ${year}`;
+    };
+
+    const isSectionFilled = (sectionName) => {
+        if (!visibleSections[sectionName]) return true; // If not visible, it's "filled" for this check
+
+        switch (sectionName) {
+            case 'education':
+                return cleanEducation.length > 0 && !isEducationEmpty(formData.education);
+            case 'experience':
+                return cleanExperience.length > 0 && !isExperienceEmpty(formData.experience);
+            case 'projects':
+                return cleanProjects.length > 0 && !isProjectsEmpty(formData.projects);
+            case 'skills':
+                return !isSkillsEmpty(formData.skills);
+            default:
+                return true;
+        }
     };
 
     return (
@@ -163,9 +248,14 @@ function Preview({ formData, visibleSections, onClose }) {
                     )}
                 </div>
                 <div className="preview-actions">
-                    <button className="generate-pdf-btn" onClick={generatePDF}>
-                        Generate PDF
+                    <button 
+                        className="generate-pdf-btn" 
+                        onClick={handleGeneratePdf} 
+                        disabled={!isPdfGenerationPossible || isGeneratingPdf}
+                    >
+                        {isGeneratingPdf ? 'Generating...' : 'Generate PDF'}
                     </button>
+                    {pdfError && <p className="pdf-error-message" style={{ color: 'red', marginTop: '10px', fontSize: '0.9em' }}>Error: {pdfError}</p>}
                 </div>
             </div>
         </div>

@@ -14,6 +14,7 @@ function Dashboard() {
             name: '',
             email: '',
             phone: '',
+            address: '',
             linkedIn: '',
             github: ''
         },
@@ -45,6 +46,7 @@ function Dashboard() {
     });
 
     const [visibleSections, setVisibleSections] = useState({
+        personal: true,
         education: true,
         experience: true,
         projects: true,
@@ -161,6 +163,38 @@ function Dashboard() {
         }));
     };
 
+    const handleAIBulletPoints = async (index) => {
+        const proj = formData.projects[index];
+        if (!proj.name || !proj.technologies || !proj.description) return;
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/generate-bullets`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: proj.name,
+                    technologies: proj.technologies,
+                    description: proj.description
+                })
+            });
+            const data = await response.json();
+            if (data.bullets && Array.isArray(data.bullets)) {
+                setFormData(prev => {
+                    const newProjects = prev.projects.map((p, i) =>
+                        i === index ? { ...p, points: data.bullets } : p
+                    );
+                    return { ...prev, projects: newProjects };
+                });
+            } else {
+                alert('AI did not return bullet points.');
+            }
+        } catch (err) {
+            alert('Failed to generate AI bullet points.');
+        }
+    };
+
     return (
         <div className="dashboard">
             <nav className="dashboard-nav">
@@ -200,6 +234,14 @@ function Dashboard() {
             <div className="dashboard-content">
                 <div className="sidebar">
                     <div className="section-toggles">
+                        <label className="toggle-label">
+                            <input
+                                type="checkbox"
+                                checked={visibleSections.personal}
+                                onChange={() => toggleSection('personal')}
+                            />
+                            <span>Personal Details</span>
+                        </label>
                         <label className="toggle-label">
                             <input
                                 type="checkbox"
@@ -464,10 +506,8 @@ function Dashboard() {
                                     <button
                                         className="generate-ai-btn"
                                         style={{ marginBottom: '0.5em' }}
-                                        onClick={async () => {
-                                            alert('AI bullet generation not implemented. This should call your backend or AI API.');
-                                        }}
-                                        disabled={!proj.name || !proj.description}
+                                        onClick={() => handleAIBulletPoints(index)}
+                                        disabled={!proj.name || !proj.technologies || !proj.description}
                                     >
                                         Generate AI Bullet Points
                                     </button>

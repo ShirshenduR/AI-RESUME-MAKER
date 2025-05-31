@@ -12,11 +12,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/genai": "^1.3.0",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "passport": "^0.5.3",
+    "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   }
 }

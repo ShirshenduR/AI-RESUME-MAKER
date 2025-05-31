@@ -14,8 +14,13 @@ router.get('/google/callback',
 );
 
 router.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect(process.env.CLIENT_URL+ '/login');
+    req.logout((err) => {
+        if (err) {
+            console.error('Error during logout:', err);
+            return res.status(500).json({ message: 'Error during logout' });
+        }
+        res.redirect(process.env.CLIENT_URL + '/login');
+    });
 });
 
 router.get('/login/success', (req, res) => {
