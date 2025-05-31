@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./Login.css";
 function Login() {
   const googleLogin = () => {
-    window.open(`${import.meta.env.VITE_API_URL}/auth/google/callback`, "_self");
+    window.open(`${import.meta.env.VITE_API_URL}/auth/google/`, "_self");
   };
 
 
