@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const session = require('express-session');
 require('./passport');
 const { GoogleGenAI } = require("@google/genai");
 const fs = require('fs');
@@ -15,34 +16,32 @@ const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
 
 const app = express();
 
+
 app.use(cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
+
 app.set('trust proxy', 1);
-app.use(cookieSession({
-    name: 'session',
-    keys: [process.env.COOKIE_KEY],
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: true, 
-    sameSite: 'none',
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // true if using HTTPS in production
     httpOnly: true,
+    sameSite: 'none',  // required for cross-site cookies
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+  }
 }));
 
-app.use((req, res, next) => {
-    if (req.session && !req.session.regenerate) {
-        req.session.regenerate = (cb) => {
-            cb()
-        }
-    }
-    if (req.session && !req.session.save) {
-        req.session.save = (cb) => {
-            cb()
-        }
-    }
-    next()
-});
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 app.use(passport.initialize());
