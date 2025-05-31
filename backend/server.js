@@ -74,38 +74,46 @@ app.post('/ai/generate-bullets', async (req, res) => {
     }
 });
 
+const { Readable } = require('stream');
+
 app.post('/api/generate-pdf', async (req, res) => {
-    const { formData, visibleSections } = req.body;
-    
-    if (!formData || !visibleSections) {
-        return res.status(400).json({ error: 'Missing required data' });
+  const { formData, visibleSections } = req.body;
+
+  if (!formData || !visibleSections) {
+    return res.status(400).json({ error: 'Missing required data' });
+  }
+
+  try {
+    const latexContent = generateLatexContent(formData, visibleSections);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${latexEscape(formData.personal.name || 'resume')}.pdf"`);
+
+    const inputStream = Readable.from([latexContent]);
+    const pdfStream = latex(inputStream);
+
+    pdfStream.on('error', (err) => {
+      console.error('LaTeX compile error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to compile LaTeX to PDF' });
+      } else {
+        // If headers already sent, just close connection
+        res.end();
+      }
+    });
+
+    res.on('close', () => {
+      pdfStream.destroy();
+    });
+
+    pdfStream.pipe(res);
+
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to generate PDF: ' + error.message });
     }
-
-    try {
-        const latexContent = generateLatexContent(formData, visibleSections);
-
-        // Use node-latex streaming API
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${latexEscape(formData.personal.name || 'resume')}.pdf"`);
-
-        const inputStream = require('stream').Readable.from([latexContent]);
-        const pdfStream = latex(inputStream);
-
-        pdfStream.on('error', (err) => {
-            console.error('LaTeX compile error:', err);
-            if (!res.headersSent) {
-                res.status(500).json({ error: 'Failed to compile LaTeX to PDF' });
-            }
-        });
-
-        pdfStream.pipe(res);
-
-    } catch (error) {
-        console.error('PDF generation error:', error);
-        if (!res.headersSent) {
-            res.status(500).json({ error: 'Failed to generate PDF: ' + error.message });
-        }
-    }
+  }
 });
 
 function generateLatexContent(formData, visibleSections) {
