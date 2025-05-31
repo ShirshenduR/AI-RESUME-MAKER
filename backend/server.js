@@ -340,5 +340,18 @@ function generateLatexContent(formData, visibleSections) {
     return latex;
 }
 
+
+
+
+router.get('/debug-cookie', (req, res) => {
+  res.cookie('testcookie', 'testvalue', {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+  });
+  res.send('Cookie set');
+});
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
