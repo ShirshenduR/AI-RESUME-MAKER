@@ -16,32 +16,40 @@ const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
 
 const app = express();
 
+// ✅ Trust Render proxy
 app.set('trust proxy', 1);
+
+// ✅ CORS - must match your frontend
 app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  origin: process.env.CLIENT_URL, // like https://frontend.onrender.com
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
+// ✅ Enable CORS for preflight
 app.options('*', cors());
 
+// ✅ Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Session with secure cookies
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true if using HTTPS in production
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'none',  // required for cross-site cookies
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000,
   }
 }));
 
+// ✅ Passport init
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 app.use('/auth', require('./routes/auth'));
 
