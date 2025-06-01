@@ -1,13 +1,13 @@
 # AI Resume Maker
 
-A sleek, LaTeX-inspired resume builder with live preview, secure Google OAuth, and AI-powered bullet point generation for professional and ATS-friendly resumes.
+A sleek, LaTeX-inspired resume builder with live preview, secure Firebase authentication, and AI-powered bullet point generation for professional and ATS-friendly resumes.
 
 ---
 
 ## 🚀 Features
 
-* **🔐 Google OAuth Authentication**
-  Secure sign-in/sign-out with Google, including user profile and image support.
+* **🔐 Firebase Authentication**
+  Secure sign-in with Google OAuth, including user profile and image support.
 
 * **📋 Resume Builder Dashboard**
   Intuitive dashboard for entering and managing resume sections:
@@ -39,8 +39,8 @@ A sleek, LaTeX-inspired resume builder with live preview, secure Google OAuth, a
 
 ```
 AI-RESUME-MAKER/
-  backend/           # Node.js/Express (API, OAuth, PDF, AI services)
-  frontend/          # React (Vite-based UI with preview and forms)
+  backend/           # Node.js/Express (API, PDF, AI services)
+  frontend/          # React (Vite-based UI with Firebase auth, preview and forms)
 ```
 
 ---
@@ -81,30 +81,13 @@ npm install
 
 2. Edit `.env` and fill in the required values:
 
-**Google OAuth Setup:**
-- Go to [Google Cloud Console](https://console.cloud.google.com/)
-- Create a new project or select existing one
-- Enable Google+ API
-- Go to Credentials → Create Credentials → OAuth 2.0 Client IDs
-- Set authorized redirect URIs to: `http://localhost:5000/auth/google/callback`
-- Copy Client ID and Client Secret to your `.env` file
-
 **Gemini AI Setup:**
 - Go to [Google AI Studio](https://aistudio.google.com/)
 - Get your API key
 - Add it to your `.env` file
 
-**Firebase Authentication Setup:**
-- Go to [Firebase Console](https://console.firebase.google.com/)
-- Create a new project or select existing one
-- Enable Authentication and configure sign-in methods (Email/Password, Google)
-- Get your Firebase config from Project Settings
-- Add Firebase config to your `.env` file
-
 **Example .env configuration:**
 ```env
-GOOGLE_CLIENT_ID=804574429648-example.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=GOCSPX-exampleSecretKey
 CLIENT_URL=http://localhost:5173
 SERVER_URL=http://localhost:5000
 PORT=5000
@@ -135,6 +118,14 @@ npm install
    ```
 
 2. Edit `.env` with Firebase configuration:
+
+**Firebase Authentication Setup:**
+- Go to [Firebase Console](https://console.firebase.google.com/)
+- Create a new project or select existing one
+- Enable Authentication and configure Google sign-in method
+- Go to Project Settings → General → Your apps → Web app
+- Copy the Firebase configuration values
+
    ```env
    VITE_API_URL=http://localhost:5000
    VITE_FIREBASE_API_KEY=your_firebase_api_key
@@ -153,10 +144,39 @@ npm run dev
 
 The frontend will run on `http://localhost:5173`
 
-### 4. Verify Setup
+### 4. Firebase Setup Instructions
+
+#### Step-by-step Firebase Configuration:
+
+1. **Create Firebase Project:**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Click "Create a project" or "Add project"
+   - Enter project name (e.g., "resume-maker-app")
+   - Complete project creation
+
+2. **Enable Authentication:**
+   - In Firebase project dashboard, click "Authentication"
+   - Click "Get started"
+   - Go to "Sign-in method" tab
+   - Enable Google sign-in provider
+   - Add your support email and project name
+   - Click "Save"
+
+3. **Configure Authorized Domains:**
+   - In Authentication → Sign-in method → Authorized domains
+   - Add `localhost` (for development)
+   - Add your production domain (when deploying)
+
+4. **Get Firebase Configuration:**
+   - Click gear icon ⚙️ → Project settings
+   - Scroll to "Your apps" → Click Web icon `</>`
+   - Register app with nickname "Resume Maker Web"
+   - Copy the configuration values to your `.env` file
+
+### 5. Verify Setup
 
 1. Open `http://localhost:5173` in your browser
-2. Click "Sign In" and test Google OAuth
+2. Click "Continue with Google" to test Firebase authentication
 3. Try creating a resume and generating a PDF
 
 ---
@@ -166,9 +186,10 @@ The frontend will run on `http://localhost:5173`
 ### Backend Deployment (Railway/Render/Heroku)
 
 1. Deploy your backend to your preferred service
-2. Set environment variables in your deployment platform
-3. Update `CLIENT_URL` to your frontend deployment URL
-4. Update `SERVER_URL` to your backend deployment URL
+2. Set environment variables in your deployment platform:
+   - `CLIENT_URL` (your frontend deployment URL)
+   - `GEMINI_API_KEY`
+   - `NODE_ENV=production`
 
 ### Frontend Deployment (Vercel/Netlify)
 
@@ -176,11 +197,12 @@ The frontend will run on `http://localhost:5173`
    ```env
    VITE_API_URL=https://your-backend-domain.com
    ```
-2. Deploy to Vercel/Netlify
+2. Add all Firebase environment variables to your deployment platform
+3. Deploy to Vercel/Netlify
 
 ### Important Notes for Deployment
 
-- **Google OAuth**: Update authorized redirect URIs in Google Cloud Console to include your production URLs
+- **Firebase Authentication**: Update authorized domains in Firebase Console to include your production URLs
 - **CORS**: The backend is configured to allow requests from `CLIENT_URL`
 - **PDF Generation**: Ensure your deployment platform supports LaTeX (some platforms may require additional setup)
 
@@ -190,9 +212,10 @@ The frontend will run on `http://localhost:5173`
 
 ### Common Issues
 
-1. **404 after login redirect**: 
-   - Ensure your backend is deployed and `VITE_API_URL` points to the correct URL
-   - Check that Google OAuth redirect URLs are correctly configured
+1. **Authentication not working**: 
+   - Verify Firebase configuration values are correct
+   - Check that your domain is added to Firebase authorized domains
+   - Ensure Firebase project has Google sign-in enabled
 
 2. **PDF generation fails**:
    - Verify pdflatex is installed and accessible
@@ -204,24 +227,24 @@ The frontend will run on `http://localhost:5173`
 
 4. **CORS errors**:
    - Ensure `CLIENT_URL` in backend `.env` matches your frontend URL
-   - Verify credentials are included in requests
 
 ### Development Tips
 
 - Use browser developer tools to check network requests
 - Check backend console logs for detailed error messages
 - Ensure all environment variables are properly set
+- Test Firebase authentication in incognito mode to verify functionality
 
 ---
 
-## 📝 Features
+## 📝 Key Technologies
 
-- **Google OAuth Authentication**
-- **AI-Powered Bullet Point Generation** (using Gemini AI)
-- **Live Resume Preview**
-- **Professional PDF Export** (LaTeX-based)
-- **Responsive Design**
-- **Section Toggle Functionality**
+- **Frontend**: React, Vite, Firebase Authentication
+- **Backend**: Node.js, Express
+- **Authentication**: Firebase (Google OAuth)
+- **AI**: Google Gemini API for bullet point generation
+- **PDF Generation**: LaTeX with node-latex
+- **Styling**: CSS with responsive design
 
 ---
 
@@ -230,7 +253,7 @@ The frontend will run on `http://localhost:5173`
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Test thoroughly (including authentication flow)
 5. Submit a pull request
 
 ---
