@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 import Preview from '../components/Preview';
 
 function Dashboard() {
+    const { currentUser, logout } = useAuth();
+    const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState('personal');
     const [user, setUser] = useState(null);
     const [showPreview, setShowPreview] = useState(false);
-    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         personal: {
@@ -54,35 +56,18 @@ function Dashboard() {
     });
 
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('authentication failed');
-                }
-                const data = await response.json();
-                if (data.user) {
-                    setUser(data.user);
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                navigate('/login');
-            }
-        };
-        checkAuth();
-    }, [navigate]);
+        if (!currentUser) {
+            navigate('/login');
+        }
+    }, [currentUser, navigate]);
 
-    const handleLogout = () => {
-         window.open(`${import.meta.env.VITE_API_URL}/auth/logout`, "_self");
-        setUser(null);
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error('Failed to log out:', error);
+        }
     };
 
     const handleInputChange = (section, field, value, index = null, pointIndex = null) => {
@@ -195,6 +180,10 @@ function Dashboard() {
         }
     };
 
+    if (!currentUser) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="dashboard">
             <nav className="dashboard-nav">
@@ -218,10 +207,11 @@ function Dashboard() {
                     </button>
                     <div className="profile-menu">
                         <img 
-                            src={user?.photo || '/default-avatar.png'} 
+                            src={currentUser?.photoURL || '/default-avatar.png'} 
                             alt="Profile" 
                             className="profile-img"
                         />
+                        <span>{currentUser?.displayName || currentUser?.email}</span>
                         <button 
                             className="nav-logout-btn"
                             onClick={handleLogout}

@@ -94,6 +94,13 @@ npm install
 - Get your API key
 - Add it to your `.env` file
 
+**Firebase Authentication Setup:**
+- Go to [Firebase Console](https://console.firebase.google.com/)
+- Create a new project or select existing one
+- Enable Authentication and configure sign-in methods (Email/Password, Google)
+- Get your Firebase config from Project Settings
+- Add Firebase config to your `.env` file
+
 **Example .env configuration:**
 ```env
 GOOGLE_CLIENT_ID=804574429648-example.apps.googleusercontent.com
@@ -102,7 +109,6 @@ CLIENT_URL=http://localhost:5173
 SERVER_URL=http://localhost:5000
 PORT=5000
 GEMINI_API_KEY=AIzaSyExample_API_Key
-SESSION_SECRET=your_random_session_secret
 NODE_ENV=development
 ```
 
@@ -128,9 +134,15 @@ npm install
    cp .env.example .env
    ```
 
-2. Edit `.env` with your backend URL:
+2. Edit `.env` with Firebase configuration:
    ```env
    VITE_API_URL=http://localhost:5000
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
    ```
 
 #### Start Frontend Development Server

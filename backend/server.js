@@ -1,83 +1,58 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const passport = require('passport');
-const session = require('express-session');
-require('./passport');
 const { GoogleGenAI } = require("@google/genai");
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
 const latex = require('node-latex');
+const { exec } = require('child_process');
+const { Readable } = require('stream');
 const { latexEscape } = require('./utils/latexEscape');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const app = express();
 
-// ✅ Trust Render proxy
+// Trust Render proxy
 app.set('trust proxy', 1);
 
-// ✅ CORS - must match your frontend
+// CORS configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL, // like https://frontend.onrender.com
+  origin: process.env.CLIENT_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
-
-// ✅ Enable CORS for preflight
 app.options('*', cors());
 
-// ✅ Body parsing
+// Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Session with secure cookies
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'keyboard cat',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: 'none',
-    maxAge: 24 * 60 * 60 * 1000,
-  }
-}));
-
-// ✅ Passport init
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-app.use('/auth', require('./routes/auth'));
-
+// AI route for generating bullet points
 app.post('/ai/generate-bullets', async (req, res) => {
-    const { name, technologies, description } = req.body;
-    if (!name || !technologies || !description) {
-        return res.status(400).json({ error: 'Missing required fields.' });
-    }
-    try {
-        const prompt = `You are an expert resume writer. Given the following project details, generate 3-5 concise, impactful resume bullet points (in plain text, no numbering, no markdown, no extra text):\n\nProject Name: ${name}\nTechnologies: ${technologies}\nDescription: ${description}\n\nBullet Points:`;
+  const { name, technologies, description } = req.body;
+  if (!name || !technologies || !description) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+  try {
+    const prompt = `You are an expert resume writer. Given the following project details, generate 3-5 concise, impactful resume bullet points (in plain text, no numbering, no markdown, no extra text):\n\nProject Name: ${name}\nTechnologies: ${technologies}\nDescription: ${description}\n\nBullet Points:`;
 
-        const result = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-001',
-            contents: prompt,
-        });
-        
-        const text = result.text || '';
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-001',
+      contents: prompt,
+    });
 
-        const bullets = text.split(/\n|\r/).map(line => line.replace(/^[-\u2022*\d.\s]+/, '').trim()).filter(Boolean);
-        res.json({ bullets });
-    } catch (err) {
-        console.error('Gemini API error:', err);
-        res.status(500).json({ error: 'Failed to generate bullet points.' });
-    }
+    const text = result.text || '';
+    const bullets = text.split(/\n|\r/).map(line => line.replace(/^[-\u2022*\d.\s]+/, '').trim()).filter(Boolean);
+    res.json({ bullets });
+  } catch (err) {
+    console.error('Gemini API error:', err);
+    res.status(500).json({ error: 'Failed to generate bullet points.' });
+  }
 });
 
-const { Readable } = require('stream');
-
+// PDF generation route
 app.post('/api/generate-pdf', async (req, res) => {
   const { formData, visibleSections } = req.body;
 
@@ -99,7 +74,6 @@ app.post('/api/generate-pdf', async (req, res) => {
       if (!res.headersSent) {
         res.status(500).json({ error: 'Failed to compile LaTeX to PDF' });
       } else {
-        // If headers already sent, just close connection
         res.end();
       }
     });
@@ -109,7 +83,6 @@ app.post('/api/generate-pdf', async (req, res) => {
     });
 
     pdfStream.pipe(res);
-
   } catch (error) {
     console.error('PDF generation error:', error);
     if (!res.headersSent) {
