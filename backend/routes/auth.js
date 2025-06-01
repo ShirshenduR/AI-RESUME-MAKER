@@ -35,12 +35,12 @@ router.get('/login/success', (req, res) => {
     }
 });
 
-app.get('/test-set-cookie', (req, res) => {
+router.get('/test-set-cookie', (req, res) => {
   req.session.test = 'hello';
   res.send('Session set');
 });
 
-app.get('/test-get-cookie', (req, res) => {
+router.get('/test-get-cookie', (req, res) => {
   res.send(`Session says: ${req.session.test}`);
 });
 
