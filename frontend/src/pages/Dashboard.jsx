@@ -206,12 +206,18 @@ function Dashboard() {
                         Preview Resume
                     </button>
                     <div className="profile-menu">
-                        <img 
-                            src={currentUser?.photoURL || '/default-avatar.png'} 
-                            alt="Profile" 
-                            className="profile-img"
-                        />
-                        <span>{currentUser?.displayName || currentUser?.email}</span>
+                        <div className="profile-info">
+                            <img 
+                                src={currentUser?.photoURL || '/default-avatar.png'} 
+                                alt="Profile" 
+                                className="profile-img"
+                            />
+                            <div className="profile-details">
+                                <span className="profile-name">
+                                    {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
+                                </span>
+                            </div>
+                        </div>
                         <button 
                             className="nav-logout-btn"
                             onClick={handleLogout}

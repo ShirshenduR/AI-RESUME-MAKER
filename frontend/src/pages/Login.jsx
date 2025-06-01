@@ -1,18 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../firebase/config";
 import "./Login.css";
 
 function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -23,24 +15,6 @@ function Login() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate("/dashboard");
-    } catch (error) {
-      setError(error.message);
-    }
-    setLoading(false);
-  };
-
-  const handleEmailAuth = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-      }
       navigate("/dashboard");
     } catch (error) {
       setError(error.message);
@@ -73,69 +47,22 @@ function Login() {
 
       <div className="login-container">
         <div className="login-card">
-          <div className="auth-tabs">
-            <button
-              className={`tab-btn ${isLogin ? "active" : ""}`}
-              onClick={() => setIsLogin(true)}
-            >
-              Sign In
-            </button>
-            <button
-              className={`tab-btn ${!isLogin ? "active" : ""}`}
-              onClick={() => setIsLogin(false)}
-            >
-              Sign Up
-            </button>
-          </div>
-
           <h2>Welcome to Resume Maker</h2>
           <p className="login-subtitle">
-            {isLogin
-              ? "Sign in to create your professional resume"
-              : "Create an account to get started"}
+            Sign in with Google to create your professional resume
           </p>
 
           {error && (
-            <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
-          )}
-
-          <form onSubmit={handleEmailAuth} className="auth-form">
-            <div className="input-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <label>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={loading}
+            <p
+              style={{
+                color: "red",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
             >
-              {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
-            </button>
-          </form>
-
-          <div
-            style={{
-              margin: "1rem 0",
-              textAlign: "center",
-              color: "#666",
-            }}
-          >
-            or
-          </div>
+              {error}
+            </p>
+          )}
 
           <button
             onClick={googleLogin}
@@ -165,7 +92,7 @@ function Login() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            {loading ? "Signing in..." : "Continue with Google"}
           </button>
         </div>
       </div>

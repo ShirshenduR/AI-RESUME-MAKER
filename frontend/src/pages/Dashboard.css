@@ -55,6 +55,9 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .preview-btn:hover {
@@ -244,6 +247,88 @@ input {
   background: #fff;
 }
 
+/* Profile section styling */
+.dashboard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    min-width: 0;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    flex-shrink: 0;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    line-height: 1.2;
+}
+
+.nav-logout-btn {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(180deg, #dc3545 20%, #c82333 85%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.nav-logout-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .dashboard-content {
         flex-direction: column;
@@ -267,70 +352,68 @@ input {
     }
 
     .dashboard-nav {
-        padding: 0 1rem;
+        padding: 0.75rem 1rem;
+        flex-wrap: nowrap;
     }
-
-    .form-section {
-        margin-bottom: 2rem;
+    
+    .nav-right {
+        gap: 0.5rem;
+        min-width: 0;
     }
-
-    .preview-btn {
-        font-size: 0.9rem;
-        padding: 0.4rem 1rem;
+    
+    .profile-menu {
+        padding: 0.25rem;
+        gap: 0.5rem;
+        background: transparent;
+    }
+    
+    .profile-img {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .profile-name {
+        font-size: 0.8rem;
+        max-width: 100px;
+    }
+    
+    .preview-btn, .nav-logout-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
     }
 }
 
 @media (max-width: 480px) {
     .dashboard-nav {
-        padding: 0 0.5rem;
-    }
-
-    .form-container {
         padding: 0.5rem;
     }
-
-    .form-section {
-        padding: 1rem;
+    
+    .nav-right {
+        gap: 0.25rem;
     }
-
-    .sidebar-btn {
-        padding: 0.75rem;
-        font-size: 0.9rem;
+    
+    .profile-name {
+        max-width: 80px;
+        font-size: 0.75rem;
+    }
+    
+    .profile-img {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .preview-btn, .nav-logout-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
     }
 }
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
 
-.profile-menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
-}
-
-.profile-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #2C60BB;
-}
-
-.nav-logout-btn {
-    padding: 0.5rem 1.5rem;
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-}
-
-.nav-logout-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(44, 96, 187, 0.3);
+@media (max-width: 360px) {
+    .profile-name {
+        display: none;
+    }
+    
+    .profile-details {
+        display: none;
+    }
 }
