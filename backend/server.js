@@ -14,10 +14,10 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const app = express();
 
-// Trust Render proxy
+
 app.set('trust proxy', 1);
 
-// CORS configuration
+
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
@@ -25,11 +25,11 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-// Body parsing
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// AI route for generating bullet points
+// AI route
 app.post('/ai/generate-bullets', async (req, res) => {
   const { name, technologies, description } = req.body;
   if (!name || !technologies || !description) {
