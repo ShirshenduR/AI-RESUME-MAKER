@@ -1,7 +1,6 @@
 name: Notify Discord
 
 on:
-  workflow_dispatch:
   issues:
     types: [opened, closed]
   pull_request:
@@ -13,9 +12,8 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Send Discord Notification with Embed Preview
+      - name: Send Discord Notification with URL Preview
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
@@ -30,62 +28,29 @@ jobs:
           PR_URL="${{ github.event.pull_request.html_url }}"
           REPO_URL="https://github.com/${REPO}"
 
-          # Default embed values
-          EMBED_TITLE="GitHub Notification"
-          EMBED_DESC="New GitHub event in $REPO"
-          EMBED_URL="$REPO_URL"
-          EMBED_COLOR=7506394  # A blue-ish color
+          MESSAGE="New GitHub Event in $REPO by $ACTOR"
 
           if [[ "$EVENT_NAME" == "issues" ]]; then
             if [[ "$ACTION" == "opened" ]]; then
-              EMBED_TITLE="🐛 New Issue Created"
-              EMBED_DESC="**$ISSUE_TITLE** by **$ACTOR**"
-              EMBED_URL="$ISSUE_URL"
+              MESSAGE="New Issue Created: $ISSUE_TITLE by $ACTOR\n$ISSUE_URL"
             elif [[ "$ACTION" == "closed" ]]; then
-              EMBED_TITLE="✅ Issue Closed"
-              EMBED_DESC="**$ISSUE_TITLE** by **$ACTOR**"
-              EMBED_URL="$ISSUE_URL"
+              MESSAGE="Issue Closed: $ISSUE_TITLE by $ACTOR\n$ISSUE_URL"
             fi
           elif [[ "$EVENT_NAME" == "pull_request" ]]; then
             if [[ "$ACTION" == "opened" ]]; then
-              EMBED_TITLE="📦 New Pull Request"
-              EMBED_DESC="**$PR_TITLE** by **$ACTOR**"
-              EMBED_URL="$PR_URL"
+              MESSAGE="New Pull Request: $PR_TITLE by $ACTOR\n$PR_URL"
             elif [[ "$ACTION" == "closed" ]]; then
-              EMBED_TITLE="🔒 Pull Request Closed"
-              EMBED_DESC="**$PR_TITLE** by **$ACTOR**"
-              EMBED_URL="$PR_URL"
+              MESSAGE="Pull Request Closed: $PR_TITLE by $ACTOR\n$PR_URL"
             fi
           elif [[ "$EVENT_NAME" == "watch" ]]; then
-            EMBED_TITLE="⭐ Repo Starred"
-            EMBED_DESC="**$REPO** starred by **$ACTOR**"
-            EMBED_URL="$REPO_URL"
+            MESSAGE="⭐ Repo Starred by $ACTOR\n$REPO_URL"
           elif [[ "$EVENT_NAME" == "fork" ]]; then
-            EMBED_TITLE="🍴 Repo Forked"
-            EMBED_DESC="**$REPO** forked by **$ACTOR**"
-            EMBED_URL="$REPO_URL"
+            MESSAGE="Repo Forked by $ACTOR\n$REPO_URL"
+          else
+            MESSAGE="$REPO_URL"
           fi
 
-          # JSON payload with embed for Discord
-          PAYLOAD=$(jq -n \
-            --arg title "$EMBED_TITLE" \
-            --arg description "$EMBED_DESC" \
-            --arg url "$EMBED_URL" \
-            --arg color "$EMBED_COLOR" \
-            '{
-              embeds: [
-                {
-                  title: $title,
-                  description: $description,
-                  url: $url,
-                  color: ($color | tonumber)
-                }
-              ]
-            }'
-          )
-
-          # Send to Discord webhook
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "$PAYLOAD" \
+               -d "{\"content\": \"$MESSAGE\"}" \
                $DISCORD_WEBHOOK
