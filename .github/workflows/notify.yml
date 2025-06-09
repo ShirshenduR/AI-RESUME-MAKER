@@ -1,0 +1,52 @@
+name: Notify Discord
+
+on:
+  issues:
+    types: [opened, closed]
+  pull_request:
+    types: [opened, closed]
+  watch:   # for stars
+  fork:
+  repository_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }} # Set the Discord webhook URL in Repository Secrets
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          ACTION="${{ github.event.action }}"
+          REPO="${{ github.repository }}"
+          ACTOR="${{ github.actor }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          # Fallback message
+          MESSAGE="New GitHub Event in $REPO by $ACTOR"
+
+          if [[ "$EVENT_NAME" == "issues" ]]; then
+            if [[ "$ACTION" == "opened" ]]; then
+              MESSAGE="New Issue Created: **$ISSUE_TITLE** by **$ACTOR**"
+            elif [[ "$ACTION" == "closed" ]]; then
+              MESSAGE="Issue Closed: **$ISSUE_TITLE** by **$ACTOR**"
+            fi
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            if [[ "$ACTION" == "opened" ]]; then
+              MESSAGE="New Pull Request: **$PR_TITLE** by **$ACTOR**"
+            elif [[ "$ACTION" == "closed" ]]; then
+              MESSAGE="Pull Request Closed: **$PR_TITLE** by **$ACTOR**"
+            fi
+          elif [[ "$EVENT_NAME" == "watch" ]]; then
+            MESSAGE="⭐ Repo Starred by **$ACTOR**"
+          elif [[ "$EVENT_NAME" == "fork" ]]; then
+            MESSAGE="Repo Forked by **$ACTOR**"
+          fi
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               $DISCORD_WEBHOOK
