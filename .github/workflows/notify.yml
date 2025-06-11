@@ -9,7 +9,7 @@ on:
   watch:   # for stars
   fork:
   repository_dispatch:
-
+  push:
 jobs:
   notify:
     runs-on: ubuntu-latest
