@@ -42,15 +42,15 @@ jobs:
               MESSAGE="Pull Request Closed: **[$PR_TITLE]($PR_URL)** by **$ACTOR**"
             fi
           elif [[ "$EVENT_NAME" == "watch" ]]; then
-            MESSAGE="⭐ Repo Starred by **$ACTOR** - [View Action]($ACTION_URL)"
+            MESSAGE="⭐ Repo Starred by **$ACTOR**"
           elif [[ "$EVENT_NAME" == "fork" ]]; then
-            MESSAGE="Repo Forked by **$ACTOR** - [View Action]($ACTION_URL)"
+            MESSAGE="Repo Forked by **$ACTOR**"
           elif [[ "$EVENT_NAME" == "push" ]]; then
             COMMIT_URL="https://github.com/$REPO/commit/${{ github.sha }}"
             if [[ -n "$COMMIT_MESSAGE" ]]; then
               MESSAGE="New Push to **$REPO** by **$ACTOR**\n**Commit:** [$COMMIT_MESSAGE]($COMMIT_URL)\n"
             else
-              MESSAGE="New Push to **$REPO** by **$ACTOR** - [View Action]($ACTION_URL)"
+              MESSAGE="New Push to **$REPO** by **$ACTOR**"
             fi
           fi
           
