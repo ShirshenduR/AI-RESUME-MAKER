@@ -48,6 +48,7 @@ jobs:
             MESSAGE="⭐ Repo Starred by **$ACTOR** - [View Action]($ACTION_URL)"
           elif [[ "$EVENT_NAME" == "fork" ]]; then
             MESSAGE="Repo Forked by **$ACTOR** - [View Action]($ACTION_URL)"
+            fi
           elif [[ "$EVENT_NAME" == "push" ]]; then
             COMMIT_URL="https://github.com/$REPO/commit/${{ github.sha }}"
             if [[ -n "$COMMIT_MESSAGE" ]]; then
