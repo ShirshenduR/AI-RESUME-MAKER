@@ -1,4 +1,3 @@
-
 name: Notify Discord
 
 on:
@@ -25,25 +24,39 @@ jobs:
           ACTOR="${{ github.actor }}"
           ISSUE_TITLE="${{ github.event.issue.title }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          ACTION_URL="https://github.com/$REPO/actions/runs/${{ github.run_id }}"
+          
           # Fallback message
           MESSAGE="New GitHub Event in $REPO by $ACTOR"
+          
           if [[ "$EVENT_NAME" == "issues" ]]; then
+            ISSUE_URL="https://github.com/$REPO/issues/${{ github.event.issue.number }}"
             if [[ "$ACTION" == "opened" ]]; then
-              MESSAGE="New Issue Created: **$ISSUE_TITLE** by **$ACTOR**"
+              MESSAGE="🐛 New Issue Created: **[$ISSUE_TITLE]($ISSUE_URL)** by **$ACTOR**"
             elif [[ "$ACTION" == "closed" ]]; then
-              MESSAGE="Issue Closed: **$ISSUE_TITLE** by **$ACTOR**"
+              MESSAGE="Issue Closed: **[$ISSUE_TITLE]($ISSUE_URL)** by **$ACTOR**"
             fi
           elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            PR_URL="https://github.com/$REPO/pull/${{ github.event.pull_request.number }}"
             if [[ "$ACTION" == "opened" ]]; then
-              MESSAGE="New Pull Request: **$PR_TITLE** by **$ACTOR**"
+              MESSAGE="New Pull Request: **[$PR_TITLE]($PR_URL)** by **$ACTOR**"
             elif [[ "$ACTION" == "closed" ]]; then
-              MESSAGE="Pull Request Closed: **$PR_TITLE** by **$ACTOR**"
+              MESSAGE="Pull Request Closed: **[$PR_TITLE]($PR_URL)** by **$ACTOR**"
             fi
           elif [[ "$EVENT_NAME" == "watch" ]]; then
-            MESSAGE="⭐ Repo Starred by **$ACTOR**"
+            MESSAGE="⭐ Repo Starred by **$ACTOR** - [View Action]($ACTION_URL)"
           elif [[ "$EVENT_NAME" == "fork" ]]; then
-            MESSAGE="Repo Forked by **$ACTOR**"
+            MESSAGE="Repo Forked by **$ACTOR** - [View Action]($ACTION_URL)"
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            COMMIT_URL="https://github.com/$REPO/commit/${{ github.sha }}"
+            if [[ -n "$COMMIT_MESSAGE" ]]; then
+              MESSAGE="New Push to **$REPO** by **$ACTOR**\n**Commit:** [$COMMIT_MESSAGE]($COMMIT_URL)\n[View Action]($ACTION_URL)"
+            else
+              MESSAGE="New Push to **$REPO** by **$ACTOR** - [View Action]($ACTION_URL)"
+            fi
           fi
+          
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"$MESSAGE\"}" \
