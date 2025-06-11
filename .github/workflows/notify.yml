@@ -27,9 +27,6 @@ jobs:
           COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
           ACTION_URL="https://github.com/$REPO/actions/runs/${{ github.run_id }}"
           
-          # Fallback message
-          MESSAGE="New GitHub Event in $REPO by $ACTOR"
-          
           if [[ "$EVENT_NAME" == "issues" ]]; then
             ISSUE_URL="https://github.com/$REPO/issues/${{ github.event.issue.number }}"
             if [[ "$ACTION" == "opened" ]]; then
@@ -48,7 +45,6 @@ jobs:
             MESSAGE="⭐ Repo Starred by **$ACTOR** - [View Action]($ACTION_URL)"
           elif [[ "$EVENT_NAME" == "fork" ]]; then
             MESSAGE="Repo Forked by **$ACTOR** - [View Action]($ACTION_URL)"
-            fi
           elif [[ "$EVENT_NAME" == "push" ]]; then
             COMMIT_URL="https://github.com/$REPO/commit/${{ github.sha }}"
             if [[ -n "$COMMIT_MESSAGE" ]]; then
